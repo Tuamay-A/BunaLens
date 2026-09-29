@@ -1,0 +1,29 @@
+{
+  "classes": [
+    "defect",
+    "longberry",
+    "peaberry",
+    "premium"
+  ],
+  "temperature": 0.6,
+  "img_size": 224,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "ood": {
+    "max_prob_threshold": 0.7677878141403198,
+    "cosine_threshold": 0.4705354869365692
+  },
+  "confidence_warning_threshold": 0.6,
+  "model_version": "buna_lens_v2",
+  "test_accuracy": 0.9558,
+  "cv_accuracy_mean": 0.9593,
+  "cv_accuracy_std": 0.0039
+}
