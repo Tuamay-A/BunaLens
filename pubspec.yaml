@@ -1,0 +1,78 @@
+name: buna_lens
+description: AI-powered Ethiopian coffee bean quality grading.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # State management
+  get: ^4.6.6
+
+  # ML — on-device inference
+  tflite_flutter: ^0.12.1
+
+  # Imaging
+  image_picker: ^1.1.2
+  image: ^4.2.0
+  path_provider: ^2.1.4
+  permission_handler: ^11.3.1
+
+  # Storage
+  shared_preferences: ^2.3.2
+
+  # Cloud & Auth
+  supabase_flutter: ^2.6.0
+  flutter_secure_storage: ^9.2.2
+
+  # Offline-first & Sync
+  connectivity_plus: ^6.0.5
+  drift: ^2.20.3
+  sqlite3_flutter_libs: ^0.5.24
+
+  # UI & Fonts
+  google_fonts: ^6.2.1  # available for custom font — not yet applied to theme
+
+  # Utils
+  share_plus: ^10.0.2
+  uuid: ^4.5.1
+  intl: ^0.20.2  # MUST match flutter_localizations' pinned version
+  package_info_plus: ^8.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  # Code generation for drift — MUST match the drift runtime version exactly
+  drift_dev: ^2.20.3
+  build_runner: ^2.4.13
+
+  # Launcher icon generator — generates Android/iOS app icons from one PNG
+  flutter_launcher_icons: ^0.14.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/models/
+    - assets/config/
+    - assets/labels/
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/Logo.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/Logo.png"
+  remove_alpha_ios: true
