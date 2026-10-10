@@ -18,6 +18,7 @@ class HomeController extends GetxController {
   final premiumCount = 0.obs;
   final defectCount = 0.obs;
   final pendingSyncCount = 0.obs;
+  final userName = ''.obs;
 
   @override
   void onInit() {
@@ -25,6 +26,8 @@ class HomeController extends GetxController {
     _historyRepository = Get.find<HistoryRepository>();
     _authRepository = Get.find<AuthRepository>();
     AppLogger.d('[HomeController] Initialized');
+    // Load user name immediately — no async needed
+    userName.value = _authRepository.currentUserName;
     loadData();
   }
 

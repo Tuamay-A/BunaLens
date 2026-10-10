@@ -163,10 +163,25 @@ class AuthRepository {
   // Check if user is authenticated
   bool get isAuthenticated => _authDatasource.isAuthenticated;
 
-  // Get current user ID
+  /// Get current user ID
   String? get currentUserId => _authDatasource.currentUserId;
 
-  // Get current session
+  /// Get current user display name — falls back to email username
+  String get currentUserName {
+    final session = _authDatasource.currentSession;
+    if (session == null) return '';
+    // Try display_name from user metadata first
+    final meta = session.user.userMetadata;
+    if (meta != null) {
+      final name = meta['display_name'] as String?;
+      if (name != null && name.trim().isNotEmpty) return name.trim();
+    }
+    // Fallback: use the part of email before @
+    final email = session.user.email ?? '';
+    return email.contains('@') ? email.split('@').first : email;
+  }
+
+  /// Get current session
   Session? get currentSession => _authDatasource.currentSession;
 
   static const Duration _restoreTimeout = Duration(seconds: 5);

@@ -41,65 +41,73 @@ class HomeView extends GetView<HomeController> {
   /// Hero section with welcome message and primary action
   Widget _buildHeroSection(BuildContext context) {
     final theme = Theme.of(context);
-    final now = DateTime.now();
-    final hour = now.hour;
-    String greeting = 'Tommy Good morning';
-    if (hour >= 12 && hour < 17) {
-      greeting = 'Tommy Good afternoon';
-    } else if (hour >= 17) {
-      greeting = 'Tommy Good evening';
-    }
+    final hour = DateTime.now().hour;
+    final timeGreeting = hour < 12
+        ? 'Good morning'
+        : hour < 17
+            ? 'Good afternoon'
+            : 'Good evening';
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppColors.coffeeGradient,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.coffeeBrown.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            greeting,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w700,
+    return Obx(() {
+      final name = controller.userName.value;
+      // e.g. "Good morning, Abebe" or "Good morning" if name is empty
+      final greeting =
+          name.isNotEmpty ? '$timeGreeting, $name' : timeGreeting;
+
+      return Container(
+        decoration: BoxDecoration(
+          gradient: AppColors.coffeeGradient,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.coffeeBrown.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Ready to grade some coffee beans?',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: AppColors.cream,
-            ),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: controller.openCamera,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.white,
-                foregroundColor: AppColors.coffeeBrown,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+          ],
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              greeting,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: AppColors.white,
+                fontWeight: FontWeight.w700,
               ),
-              icon: const Icon(Icons.camera_alt, size: 24),
-              label: const Text(
-                'Scan Bean',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Ready to grade some coffee beans?',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: AppColors.cream,
               ),
             ),
-          ),
-        ],
-      ),
-    );
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: controller.openCamera,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.white,
+                  foregroundColor: AppColors.coffeeBrown,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                icon: const Icon(Icons.camera_alt, size: 24),
+                label: const Text(
+                  'Scan Bean',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   /// Quick stats cards
