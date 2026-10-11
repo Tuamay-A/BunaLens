@@ -136,39 +136,6 @@ class SignUpView extends GetView<SignUpController> {
                   ),
                 ),
 
-                const SizedBox(height: 24),
-
-                // Language selector
-                Row(
-                  children: [
-                    Text(
-                      L.t('language'),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                    const SizedBox(width: 16),
-                    Obx(
-                      () => SegmentedButton<String>(
-                        segments: [
-                          ButtonSegment(
-                            value: 'en',
-                            label: Text(L.t('lang_english')),
-                          ),
-                          ButtonSegment(
-                            value: 'am',
-                            label: Text(L.t('lang_amharic')),
-                          ),
-                        ],
-                        selected: {controller.selectedLanguage.value},
-                        onSelectionChanged: (Set<String> newSelection) {
-                          controller.setLanguage(newSelection.first);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
                 const SizedBox(height: 32),
 
                 // Sign up button
