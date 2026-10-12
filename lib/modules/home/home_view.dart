@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/l10n/l10n.dart.dart';
+import '../../core/l10n/locale_controller.dart';
 import '../../data/models/grade_result.dart';
 import 'home_controller.dart';
 
@@ -11,10 +13,63 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
+    final localeCtrl = Get.find<LocaleController>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('BunaLens'),
         elevation: 0,
+        actions: [
+          // Language dropdown
+          Obx(() {
+            final isAm = localeCtrl.isAmharic;
+            return PopupMenuButton<String>(
+              icon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    isAm ? '🇪🇹' : '🇺🇸',
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  const Icon(Icons.arrow_drop_down, color: AppColors.white),
+                ],
+              ),
+              onSelected: (code) => localeCtrl.setLocale(code),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'en',
+                  child: Row(
+                    children: [
+                      const Text('🇺🇸', style: TextStyle(fontSize: 18)),
+                      const SizedBox(width: 10),
+                      const Text('English'),
+                      if (!isAm) ...[
+                        const Spacer(),
+                        const Icon(Icons.check,
+                            size: 18, color: AppColors.coffeeBrown),
+                      ],
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'am',
+                  child: Row(
+                    children: [
+                      const Text('🇪🇹', style: TextStyle(fontSize: 18)),
+                      const SizedBox(width: 10),
+                      const Text('አማርኛ'),
+                      if (isAm) ...[
+                        const Spacer(),
+                        const Icon(Icons.check,
+                            size: 18, color: AppColors.coffeeBrown),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: controller.refresh,
@@ -22,7 +77,6 @@ class HomeView extends GetView<HomeController> {
           if (controller.isLoading.value && controller.recentScans.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
-
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -38,21 +92,20 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  /// Hero section with welcome message and primary action
   Widget _buildHeroSection(BuildContext context) {
     final theme = Theme.of(context);
     final hour = DateTime.now().hour;
-    final timeGreeting = hour < 12
-        ? 'Good morning'
+    final timeKey = hour < 12
+        ? 'good_morning'
         : hour < 17
-            ? 'Good afternoon'
-            : 'Good evening';
+            ? 'good_afternoon'
+            : 'good_evening';
 
     return Obx(() {
       final name = controller.userName.value;
-      // e.g. "Good morning, Abebe" or "Good morning" if name is empty
-      final greeting =
-          name.isNotEmpty ? '$timeGreeting, $name' : timeGreeting;
+      final greeting = name.isNotEmpty
+          ? '${L.t(timeKey)}, $name'
+          : L.t(timeKey);
 
       return Container(
         decoration: BoxDecoration(
@@ -81,7 +134,7 @@ class HomeView extends GetView<HomeController> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Ready to grade some coffee beans?',
+              L.t('hero_body'),
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: AppColors.cream,
               ),
@@ -97,9 +150,9 @@ class HomeView extends GetView<HomeController> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 icon: const Icon(Icons.camera_alt, size: 24),
-                label: const Text(
-                  'Scan Bean',
-                  style: TextStyle(
+                label: Text(
+                  L.t('scan_bean'),
+                  style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -110,7 +163,6 @@ class HomeView extends GetView<HomeController> {
     });
   }
 
-  /// Quick stats cards
   Widget _buildQuickStats(BuildContext context) {
     return Obx(() => Row(
           children: [
@@ -118,7 +170,7 @@ class HomeView extends GetView<HomeController> {
               child: _buildStatCard(
                 context,
                 icon: Icons.coffee,
-                label: 'Total Scans',
+                label: L.t('dashboard_stats_total'),
                 value: controller.totalScans.value.toString(),
                 color: AppColors.coffeeBrown,
               ),
@@ -128,7 +180,7 @@ class HomeView extends GetView<HomeController> {
               child: _buildStatCard(
                 context,
                 icon: Icons.stars,
-                label: 'Premium',
+                label: L.t('class_premium'),
                 value: controller.premiumCount.value.toString(),
                 color: AppColors.premium,
               ),
@@ -138,7 +190,7 @@ class HomeView extends GetView<HomeController> {
               child: _buildStatCard(
                 context,
                 icon: Icons.warning_amber_rounded,
-                label: 'Defects',
+                label: L.t('class_defect'),
                 value: controller.defectCount.value.toString(),
                 color: AppColors.defect,
               ),
@@ -184,10 +236,8 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  // Recent scans section
   Widget _buildRecentScansSection(BuildContext context) {
     final theme = Theme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -195,7 +245,7 @@ class HomeView extends GetView<HomeController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Recent Scans',
+              L.t('recent_scans'),
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -205,9 +255,7 @@ class HomeView extends GetView<HomeController> {
               if (pending > 0) {
                 return Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
+                      horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.warning.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
@@ -215,14 +263,11 @@ class HomeView extends GetView<HomeController> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.cloud_upload,
-                        size: 14,
-                        color: AppColors.warning,
-                      ),
+                      const Icon(Icons.cloud_upload,
+                          size: 14, color: AppColors.warning),
                       const SizedBox(width: 4),
                       Text(
-                        '$pending pending',
+                        '$pending ${L.t("sync_syncing")}',
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.warning,
@@ -255,7 +300,8 @@ class HomeView extends GetView<HomeController> {
   Widget _buildRecentScanCard(BuildContext context, GradeResult scan) {
     final theme = Theme.of(context);
     final topPrediction = scan.predictions.first;
-    final confidence = (topPrediction.probability * 100).toStringAsFixed(1);
+    final confidence =
+        (topPrediction.probability * 100).toStringAsFixed(1);
     final classColor = AppColors.getClassColor(topPrediction.label.name);
     final confidenceColor =
         AppColors.getConfidenceColor(topPrediction.probability);
@@ -269,7 +315,6 @@ class HomeView extends GetView<HomeController> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Class icon
               Container(
                 width: 56,
                 height: 56,
@@ -277,43 +322,37 @@ class HomeView extends GetView<HomeController> {
                   color: classColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  topPrediction.label.icon,
-                  color: classColor,
-                  size: 28,
-                ),
+                child: Icon(topPrediction.label.icon,
+                    color: classColor, size: 28),
               ),
               const SizedBox(width: 16),
-              // Details
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      topPrediction.label.display,
+                      L.className(topPrediction.label.name),
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                          fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      DateFormat('MMM d, yyyy • HH:mm').format(scan.createdAt),
+                      DateFormat('MMM d, yyyy • HH:mm')
+                          .format(scan.createdAt),
                       style: theme.textTheme.bodySmall,
                     ),
                     if (scan.isOod) ...[
                       const SizedBox(height: 4),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: AppColors.ood.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Text(
-                          'Out of Distribution',
-                          style: TextStyle(
+                        child: Text(
+                          L.t('not_a_bean'),
+                          style: const TextStyle(
                             fontSize: 10,
                             color: AppColors.ood,
                             fontWeight: FontWeight.w600,
@@ -324,14 +363,11 @@ class HomeView extends GetView<HomeController> {
                   ],
                 ),
               ),
-              // Confidence badge
               Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
+                        horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: confidenceColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -347,11 +383,8 @@ class HomeView extends GetView<HomeController> {
                   ),
                   if (!scan.isSynced) ...[
                     const SizedBox(height: 8),
-                    const Icon(
-                      Icons.cloud_off,
-                      size: 16,
-                      color: AppColors.gray,
-                    ),
+                    const Icon(Icons.cloud_off,
+                        size: 16, color: AppColors.gray),
                   ],
                 ],
               ),
@@ -369,24 +402,19 @@ class HomeView extends GetView<HomeController> {
       alignment: Alignment.center,
       child: Column(
         children: [
-          Icon(
-            Icons.coffee_outlined,
-            size: 64,
-            color: AppColors.gray.withOpacity(0.5),
-          ),
+          Icon(Icons.coffee_outlined,
+              size: 64, color: AppColors.gray.withOpacity(0.5)),
           const SizedBox(height: 16),
           Text(
-            'No scans yet',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: AppColors.darkGray,
-            ),
+            L.t('no_scans_yet'),
+            style: theme.textTheme.titleMedium
+                ?.copyWith(color: AppColors.darkGray),
           ),
           const SizedBox(height: 8),
           Text(
-            'Tap the scan button to grade your first coffee bean',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.gray,
-            ),
+            L.t('hero_body'),
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(color: AppColors.gray),
             textAlign: TextAlign.center,
           ),
         ],
