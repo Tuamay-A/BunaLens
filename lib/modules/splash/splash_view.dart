@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/l10n/l10n.dart.dart';
 import 'splash_controller.dart';
 
-// Splash screen — pure UI only.
-// All navigation logic (session restore → shell / onboarding / sign-in)
-// lives entirely in [SplashController].  This widget just renders the
-// branding while the controller does its async work.
+/// Splash screen — pure UI only.
+/// All navigation logic lives in [SplashController].
 class SplashView extends GetView<SplashController> {
   const SplashView({super.key});
 
@@ -27,37 +26,29 @@ class SplashView extends GetView<SplashController> {
                 color: AppColors.coffeeBrown,
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: const Icon(
-                Icons.coffee_rounded,
-                size: 52,
-                color: AppColors.white,
-              ),
+              child: const Icon(Icons.coffee_rounded,
+                  size: 52, color: AppColors.white),
             ),
-
             const SizedBox(height: 20),
 
-            // App name
-            const Text(
-              'BunaLens',
-              style: TextStyle(
+            // App name — always "BunaLens" (brand, not translated)
+            Text(
+              L.t('app_name'),
+              style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
                 color: AppColors.espresso,
                 letterSpacing: -0.5,
               ),
             ),
-
             const SizedBox(height: 6),
 
-            // Tagline
+            // Tagline — translated
             Text(
-              'See your beans. Know your grade.',
-              style: TextStyle(
-                color: AppColors.darkGray,
-                fontSize: 13,
-              ),
+              L.t('app_tagline'),
+              style: const TextStyle(
+                  color: AppColors.darkGray, fontSize: 13),
             ),
-
             const SizedBox(height: 32),
 
             // Loading indicator
@@ -67,8 +58,7 @@ class SplashView extends GetView<SplashController> {
               child: CircularProgressIndicator(
                 strokeWidth: 2.4,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  AppColors.coffeeBrown,
-                ),
+                    AppColors.coffeeBrown),
               ),
             ),
           ],
