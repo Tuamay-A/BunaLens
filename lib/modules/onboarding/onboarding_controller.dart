@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app/routes/app_routes.dart';
+import '../../core/l10n/l10n.dart.dart';
 import '../../core/utils/logger.dart';
 
 class OnboardingController extends GetxController {
@@ -15,20 +16,20 @@ class OnboardingController extends GetxController {
 
   final List<OnboardingPage> pages = [
     OnboardingPage(
-      title: 'Welcome to BunaLens',
-      description: 'AI-powered Ethiopian coffee bean quality grading at your fingertips',
+      title: L.t('onboarding_title_1'),
+      description: L.t('onboarding_body_1'),
       icon: Icons.coffee,
       color: const Color(0xFF6F4E37),
     ),
     OnboardingPage(
-      title: 'Scan & Grade',
-      description: 'Take a photo of your coffee beans and get instant quality analysis with detailed predictions',
+      title: L.t('onboarding_title_2'),
+      description: L.t('onboarding_body_2'),
       icon: Icons.camera_alt,
       color: const Color(0xFF8B6F47),
     ),
     OnboardingPage(
-      title: 'Track & Sync',
-      description: 'Keep track of all your scans with automatic cloud sync and detailed statistics',
+      title: L.t('onboarding_title_3'),
+      description: L.t('onboarding_body_3'),
       icon: Icons.cloud_done,
       color: const Color(0xFFA67B5B),
     ),
