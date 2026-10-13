@@ -15,6 +15,9 @@ class AppStrings {
 
       // Home
       'home_title':         'BunaLens',
+      'good_morning':       'Good morning',
+      'good_afternoon':     'Good afternoon',
+      'good_evening':       'Good evening',
       'hero_title':         'Grade a coffee bean',
       'hero_body':          'Take a photo or pick one from your gallery. '
                             'BunaLens will predict its class and show what it looked at.',
@@ -133,6 +136,7 @@ class AppStrings {
       'onboarding_body_3':  'All processing happens on your device. No internet needed.',
       
       // Dashboard/Home
+      'dashboard_title':    'Dashboard',
       'dashboard_greeting': 'Hello',
       'dashboard_scan_card_title': 'Scan a coffee bean',
       'dashboard_scan_card_body': 'Get instant quality grading',
@@ -164,7 +168,6 @@ class AppStrings {
       
       // Profile
       'profile_title':      'Profile',
-      'profile_display_name': 'Display name',
       'profile_email':      'Email',
       'profile_language':   'Language',
       'profile_theme':      'Theme',
@@ -213,6 +216,9 @@ class AppStrings {
 
       // Home
       'home_title':         'ቡናሌንስ',
+      'good_morning':       'እንደምን አደሩ',
+      'good_afternoon':     'እንደምን ዋሉ',
+      'good_evening':       'እንደምን አመሹ',
       'hero_title':         'ባቄላ ይመዝኑ',
       'hero_body':          'ፎቶ ያንሱ ወይም ከጋለሪ ይምረጡ። ቡናሌንስ ዓይነቱን ይተነብያል '
                             'እና የተመለከተውን ያሳያል።',
@@ -330,6 +336,7 @@ class AppStrings {
       'onboarding_body_3':  'ሁሉም ሂደት በመሳሪያዎ ላይ ይከናወናል። ኢንተርኔት አያስፈልግም።',
       
       // Dashboard/Home
+      'dashboard_title':    'ዳሽቦርድ',
       'dashboard_greeting': 'ሰላም',
       'dashboard_scan_card_title': 'የቡና ባቄላ ይቃኙ',
       'dashboard_scan_card_body': 'ፈጣን የጥራት ደረጃ ይቀበሉ',
