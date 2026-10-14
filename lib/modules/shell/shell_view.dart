@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../core/l10n/l10n.dart.dart';
+import '../../core/l10n/locale_controller.dart';
 import 'shell_controller.dart';
 import '../home/home_view.dart';
 import '../history/history_view.dart';
@@ -11,54 +14,60 @@ class ShellView extends GetView<ShellController> {
 
   @override
   Widget build(BuildContext context) {
-    // Define the 4 main screens
-    final screens = [
-      const HomeView(),
-      const HistoryView(),
-      const DashboardView(),
-      const ProfileView(),
+    // Observe locale so bottom-nav labels re-render when language changes
+    final localeCtrl = Get.find<LocaleController>();
+
+    final screens = const [
+      HomeView(),
+      HistoryView(),
+      DashboardView(),
+      ProfileView(),
     ];
 
-    return Obx(() => Scaffold(
-      body: IndexedStack(
-        index: controller.currentIndex,
-        children: screens,
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: controller.currentIndex,
-        onDestinationSelected: controller.changeTab,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: 'History',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-      floatingActionButton: controller.currentIndex == 0
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                Get.toNamed('/camera');
-              },
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('Scan Bean'),
-            )
-          : null,
-    ));
+    return Obx(() {
+      // Reading localeCtrl.locale.value here registers this Obx
+      // as a listener — any language change rebuilds the nav labels.
+      localeCtrl.locale.value;
+
+      return Scaffold(
+        body: IndexedStack(
+          index: controller.currentIndex,
+          children: screens,
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: controller.currentIndex,
+          onDestinationSelected: controller.changeTab,
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home),
+              label: L.t('home_title'),
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.history_outlined),
+              selectedIcon: const Icon(Icons.history),
+              label: L.t('history_title'),
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.dashboard_outlined),
+              selectedIcon: const Icon(Icons.dashboard),
+              label: L.t('dashboard_title'),
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.person_outline),
+              selectedIcon: const Icon(Icons.person),
+              label: L.t('profile_title'),
+            ),
+          ],
+        ),
+        floatingActionButton: controller.currentIndex == 0
+            ? FloatingActionButton.extended(
+                onPressed: () => Get.toNamed('/camera'),
+                icon: const Icon(Icons.camera_alt),
+                label: Text(L.t('scan_bean')),
+              )
+            : null,
+      );
+    });
   }
 }
