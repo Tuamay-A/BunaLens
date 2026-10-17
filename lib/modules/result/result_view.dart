@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:buna_lens/data/models/prediction.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -7,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/l10n/l10n.dart.dart';
+import '../../core/l10n/locale_controller.dart';
 import 'result_controller.dart';
 
 class ResultView extends StatelessWidget {
@@ -15,53 +16,55 @@ class ResultView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ResultController>();
-    final result = controller.result;
-    final topPrediction = result.predictions.first;
+    final localeCtrl = Get.find<LocaleController>();
+    final result     = controller.result;
+    final topPred    = result.predictions.first;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan Details'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: controller.shareScan,
-            tooltip: 'Share',
-          ),
-          Obx(() => IconButton(
-                icon: controller.isDeleting.value
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.delete_outline),
-                onPressed:
-                    controller.isDeleting.value ? null : controller.deleteScan,
-                tooltip: 'Delete',
-              )),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildImageSection(context, result),
-          const SizedBox(height: 24),
-          _buildResultCard(context, topPrediction, result),
-          const SizedBox(height: 24),
-          _buildProbabilitiesSection(context, result.predictions),
-          const SizedBox(height: 24),
-          _buildMetadataSection(context, result),
-          const SizedBox(height: 24),
-          _buildNotesSection(context, controller),
-        ],
-      ),
-    );
+    return Obx(() {
+      localeCtrl.locale.value; // reactive rebuild on language change
+
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(L.t('scan_detail_title')),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.share),
+              onPressed: controller.shareScan,
+              tooltip: L.t('scan_detail_share'),
+            ),
+            Obx(() => IconButton(
+                  icon: controller.isDeleting.value
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.delete_outline),
+                  onPressed: controller.isDeleting.value
+                      ? null
+                      : controller.deleteScan,
+                  tooltip: L.t('scan_detail_delete'),
+                )),
+          ],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            _buildImageSection(context, result),
+            const SizedBox(height: 24),
+            _buildResultCard(context, topPred, result),
+            const SizedBox(height: 24),
+            _buildProbabilitiesSection(context, result.predictions),
+            const SizedBox(height: 24),
+            _buildMetadataSection(context, result),
+            const SizedBox(height: 24),
+            _buildNotesSection(context, controller),
+          ],
+        ),
+      );
+    });
   }
 
-  // Image section with full preview
   Widget _buildImageSection(BuildContext context, dynamic result) {
     return Hero(
       tag: 'scan_image_${result.id}',
@@ -70,37 +73,25 @@ class ResultView extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 1,
           child: result.imagePath.isNotEmpty && !kIsWeb
-              ? Image.file(
-                  File(result.imagePath),
-                  fit: BoxFit.cover,
-                )
+              ? Image.file(File(result.imagePath), fit: BoxFit.cover)
               : Container(
                   decoration: BoxDecoration(
-                    color: AppColors.beige,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(
-                    Icons.image_outlined,
-                    size: 80,
-                    color: AppColors.gray,
-                  ),
+                      color: AppColors.beige,
+                      borderRadius: BorderRadius.circular(20)),
+                  child: const Icon(Icons.image_outlined,
+                      size: 80, color: AppColors.gray),
                 ),
         ),
       ),
     );
   }
 
-  // Main result card with grade and confidence
   Widget _buildResultCard(
-    BuildContext context,
-    Prediction topPrediction,
-    dynamic result,
-  ) {
-    final theme = Theme.of(context);
-    final classColor = AppColors.getClassColor(topPrediction.label.name);
-    final confidence = (topPrediction.probability * 100).toStringAsFixed(1);
-    final confidenceColor =
-        AppColors.getConfidenceColor(topPrediction.probability);
+      BuildContext context, Prediction topPred, dynamic result) {
+    final theme       = Theme.of(context);
+    final classColor  = AppColors.getClassColor(topPred.label.name);
+    final confidence  = (topPred.probability * 100).toStringAsFixed(1);
+    final confColor   = AppColors.getConfidenceColor(topPred.probability);
 
     return Container(
       decoration: BoxDecoration(
@@ -113,124 +104,90 @@ class ResultView extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: classColor.withOpacity(0.3),
-          width: 2,
-        ),
+        border: Border.all(color: classColor.withOpacity(0.3), width: 2),
       ),
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 80, height: 80,
             decoration: BoxDecoration(
-              color: classColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
+              color: classColor, shape: BoxShape.circle,
+              boxShadow: [BoxShadow(
                   color: classColor.withOpacity(0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+                  blurRadius: 12, offset: const Offset(0, 4))],
             ),
-            child: Icon(
-              topPrediction.label.icon,
-              color: AppColors.white,
-              size: 40,
-            ),
+            child: Icon(topPred.label.icon,
+                color: AppColors.white, size: 40),
           ),
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+                horizontal: 20, vertical: 8),
             decoration: BoxDecoration(
-              color: classColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              result.letterGrade,
-              style: const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: AppColors.white,
-                letterSpacing: 2,
-              ),
-            ),
+                color: classColor,
+                borderRadius: BorderRadius.circular(12)),
+            child: Text(result.letterGrade,
+                style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.white,
+                    letterSpacing: 2)),
           ),
           const SizedBox(height: 12),
           Text(
-            topPrediction.label.display,
+            L.className(topPred.label.name),
             style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: classColor,
-            ),
+                fontWeight: FontWeight.w700, color: classColor),
           ),
           const SizedBox(height: 8),
-          Text(
-            topPrediction.label.description,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.darkGray,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          Text(L.classDescription(topPred.label.name),
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: AppColors.darkGray),
+              textAlign: TextAlign.center),
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: confidenceColor.withOpacity(0.15),
+              color: confColor.withOpacity(0.15),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: confidenceColor.withOpacity(0.3),
-              ),
+              border: Border.all(color: confColor.withOpacity(0.3)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.verified,
-                  color: confidenceColor,
-                  size: 20,
-                ),
+                Icon(Icons.verified, color: confColor, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  '$confidence% Confidence',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: confidenceColor,
-                  ),
-                ),
+                Text('$confidence% ${L.t("confidence")}',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: confColor)),
               ],
             ),
           ),
           if (result.isOod) ...[
             const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.warning.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.warning.withOpacity(0.3),
-                ),
+                    color: AppColors.warning.withOpacity(0.3)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.warning_amber_rounded,
-                    color: AppColors.warning,
-                    size: 18,
-                  ),
+                  const Icon(Icons.warning_amber_rounded,
+                      color: AppColors.warning, size: 18),
                   const SizedBox(width: 8),
-                  Text(
-                    'Out of Distribution',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.warning,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text(L.t('not_a_bean'),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.warning,
+                          fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
@@ -240,31 +197,22 @@ class ResultView extends StatelessWidget {
     );
   }
 
-  // Probabilities section with bars
   Widget _buildProbabilitiesSection(
-    BuildContext context,
-    List<Prediction> predictions,
-  ) {
+      BuildContext context, List<Prediction> predictions) {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Class Probabilities',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        Text(L.t('class_probabilities'),
+            style: theme.textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 16),
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: predictions
-                  .map((prediction) => _buildProbabilityBar(
-                        context,
-                        prediction,
-                      ))
+                  .map((p) => _buildProbabilityBar(context, p))
                   .toList(),
             ),
           ),
@@ -273,10 +221,11 @@ class ResultView extends StatelessWidget {
     );
   }
 
-  Widget _buildProbabilityBar(BuildContext context, Prediction prediction) {
-    final theme = Theme.of(context);
+  Widget _buildProbabilityBar(
+      BuildContext context, Prediction prediction) {
+    final theme      = Theme.of(context);
     final classColor = AppColors.getClassColor(prediction.label.name);
-    final percentage = (prediction.probability * 100).toStringAsFixed(1);
+    final pct        = (prediction.probability * 100).toStringAsFixed(1);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -286,29 +235,18 @@ class ResultView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    prediction.label.icon,
-                    color: classColor,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    prediction.label.display,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                '$percentage%',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: classColor,
-                ),
-              ),
+              Row(children: [
+                Icon(prediction.label.icon,
+                    color: classColor, size: 20),
+                const SizedBox(width: 8),
+                Text(L.className(prediction.label.name),
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+              ]),
+              Text('$pct%',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: classColor)),
             ],
           ),
           const SizedBox(height: 8),
@@ -326,18 +264,14 @@ class ResultView extends StatelessWidget {
     );
   }
 
-  /// Metadata section
   Widget _buildMetadataSection(BuildContext context, dynamic result) {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Scan Information',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        Text(L.t('scan_detail_metadata'),
+            style: theme.textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 16),
         Card(
           child: Padding(
@@ -346,21 +280,21 @@ class ResultView extends StatelessWidget {
               children: [
                 _buildMetadataRow(
                   icon: Icons.access_time,
-                  label: 'Scanned',
+                  label: L.t('scan_detail_timestamp'),
                   value: DateFormat('MMM d, yyyy • HH:mm')
                       .format(result.createdAt),
                 ),
                 const Divider(height: 24),
                 _buildMetadataRow(
                   icon: Icons.fingerprint,
-                  label: 'Scan ID',
+                  label: 'ID',
                   value: result.id.substring(0, 8),
                 ),
                 if (result.syncedAt != null) ...[
                   const Divider(height: 24),
                   _buildMetadataRow(
                     icon: Icons.cloud_done,
-                    label: 'Synced',
+                    label: L.t('sync_synced'),
                     value: DateFormat('MMM d, yyyy • HH:mm')
                         .format(result.syncedAt!),
                   ),
@@ -369,8 +303,8 @@ class ResultView extends StatelessWidget {
                   const Divider(height: 24),
                   _buildMetadataRow(
                     icon: Icons.cloud_off,
-                    label: 'Status',
-                    value: 'Not synced',
+                    label: L.t('sync_local_only'),
+                    value: L.t('sync_local_only'),
                     valueColor: AppColors.warning,
                   ),
                 ],
@@ -396,22 +330,15 @@ class ResultView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.darkGray,
-                ),
-              ),
+              Text(label,
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.darkGray)),
               const SizedBox(height: 2),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: valueColor ?? AppColors.espresso,
-                ),
-              ),
+              Text(value,
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: valueColor ?? AppColors.espresso)),
             ],
           ),
         ),
@@ -419,8 +346,8 @@ class ResultView extends StatelessWidget {
     );
   }
 
-  // Notes section with editing capability — now strongly typed.
-  Widget _buildNotesSection(BuildContext context, ResultController controller) {
+  Widget _buildNotesSection(
+      BuildContext context, ResultController controller) {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,40 +355,31 @@ class ResultView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Notes',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            Text(L.t('scan_detail_notes'),
+                style: theme.textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w600)),
             Obx(() => controller.isEditingNotes.value
-                ? Row(
-                    children: [
-                      TextButton(
+                ? Row(children: [
+                    TextButton(
                         onPressed: controller.toggleEditNotes,
-                        child: const Text('Cancel'),
-                      ),
-                      const SizedBox(width: 8),
-                      Obx(() => ElevatedButton(
-                            onPressed: controller.isSaving.value
-                                ? null
-                                : controller.saveNotes,
-                            child: controller.isSaving.value
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text('Save'),
-                          )),
-                    ],
-                  )
+                        child: Text(L.t('cancel'))),
+                    const SizedBox(width: 8),
+                    Obx(() => ElevatedButton(
+                          onPressed: controller.isSaving.value
+                              ? null
+                              : controller.saveNotes,
+                          child: controller.isSaving.value
+                              ? const SizedBox(
+                                  width: 16, height: 16,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2))
+                              : Text(L.t('save')),
+                        )),
+                  ])
                 : IconButton(
                     icon: const Icon(Icons.edit_outlined),
                     onPressed: controller.toggleEditNotes,
-                    tooltip: 'Edit notes',
+                    tooltip: L.t('scan_detail_edit'),
                   )),
           ],
         ),
@@ -473,19 +391,16 @@ class ResultView extends StatelessWidget {
                 ? TextField(
                     controller: controller.notesController,
                     maxLines: 5,
-                    decoration: const InputDecoration(
-                      hintText: 'Add notes about this scan...',
+                    decoration: InputDecoration(
+                      hintText: L.t('scan_detail_add_notes'),
                       border: InputBorder.none,
                     ),
                   )
                 : controller.notes.value.isEmpty
-                    ? const Text(
-                        'No notes added yet. Tap edit to add notes.',
-                        style: TextStyle(
-                          color: AppColors.gray,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      )
+                    ? Text(L.t('scan_detail_add_notes'),
+                        style: const TextStyle(
+                            color: AppColors.gray,
+                            fontStyle: FontStyle.italic))
                     : Text(controller.notes.value)),
           ),
         ),
