@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/l10n/l10n.dart.dart';
+import '../../core/l10n/locale_controller.dart';
 import '../../data/models/grade_result.dart';
 import '../../data/models/coffee_class.dart';
 import 'history_controller.dart';
@@ -12,132 +14,139 @@ class HistoryView extends GetView<HistoryController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('History'),
-        actions: [
-          // View mode toggle
-          Obx(() => IconButton(
-                icon: Icon(
-                  controller.viewMode.value == ViewMode.list
-                      ? Icons.grid_view
-                      : Icons.view_list,
-                ),
-                onPressed: controller.toggleViewMode,
-                tooltip: controller.viewMode.value == ViewMode.list
-                    ? 'Grid view'
-                    : 'List view',
-              )),
-          // Clear history
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () => _showClearDialog(context),
-            tooltip: 'Clear history',
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildSearchBar(context),
-          _buildFilterChips(context),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: controller.refresh,
-              child: Obx(() {
-                if (controller.isLoading.value && controller.allScans.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+    final localeCtrl = Get.find<LocaleController>();
 
-                if (controller.filteredScans.isEmpty) {
-                  return _buildEmptyState(context);
-                }
+    return Obx(() {
+      // Observe locale so all L.t() calls rebuild when language changes
+      localeCtrl.locale.value;
 
-                return controller.viewMode.value == ViewMode.list
-                    ? _buildListView(context)
-                    : _buildGridView(context);
-              }),
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(L.t('history_title')),
+          actions: [
+            Obx(() => IconButton(
+                  icon: Icon(
+                    controller.viewMode.value == ViewMode.list
+                        ? Icons.grid_view
+                        : Icons.view_list,
+                  ),
+                  onPressed: controller.toggleViewMode,
+                  tooltip: controller.viewMode.value == ViewMode.list
+                      ? 'Grid view'
+                      : 'List view',
+                )),
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: () => _showClearDialog(context),
+              tooltip: L.t('clear_history'),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+        body: Column(
+          children: [
+            _buildSearchBar(context),
+            _buildFilterChips(context),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.refresh,
+                child: Obx(() {
+                  if (controller.isLoading.value &&
+                      controller.allScans.isEmpty) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (controller.filteredScans.isEmpty) {
+                    return _buildEmptyState(context);
+                  }
+                  return controller.viewMode.value == ViewMode.list
+                      ? _buildListView(context)
+                      : _buildGridView(context);
+                }),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
-  /// Search bar
   Widget _buildSearchBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: TextField(
         onChanged: controller.search,
         decoration: InputDecoration(
-          hintText: 'Search by class or notes...',
+          hintText: L.t('history_search_hint'),
           prefixIcon: const Icon(Icons.search),
           suffixIcon: Obx(() {
             if (controller.searchQuery.value.isNotEmpty) {
               return IconButton(
                 icon: const Icon(Icons.clear),
-                onPressed: () {
-                  controller.search('');
-                },
+                onPressed: () => controller.search(''),
               );
             }
             return const SizedBox.shrink();
           }),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+              borderRadius: BorderRadius.circular(12)),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
+              horizontal: 16, vertical: 12),
         ),
       ),
     );
   }
 
-  /// Filter chips
   Widget _buildFilterChips(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 50,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Obx(() => ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              _buildFilterChip(
-                label: 'All',
-                isSelected: controller.selectedFilter.value == null,
-                onTap: () => controller.filterByClass(null),
-              ),
-              const SizedBox(width: 8),
-              _buildFilterChip(
-                label: 'Premium',
-                isSelected: controller.selectedFilter.value == CoffeeClass.premium,
-                onTap: () => controller.filterByClass(CoffeeClass.premium),
-                color: AppColors.premium,
-              ),
-              const SizedBox(width: 8),
-              _buildFilterChip(
-                label: 'Longberry',
-                isSelected: controller.selectedFilter.value == CoffeeClass.longberry,
-                onTap: () => controller.filterByClass(CoffeeClass.longberry),
-                color: AppColors.longberry,
-              ),
-              const SizedBox(width: 8),
-              _buildFilterChip(
-                label: 'Peaberry',
-                isSelected: controller.selectedFilter.value == CoffeeClass.peaberry,
-                onTap: () => controller.filterByClass(CoffeeClass.peaberry),
-                color: AppColors.peaberry,
-              ),
-              const SizedBox(width: 8),
-              _buildFilterChip(
-                label: 'Defect',
-                isSelected: controller.selectedFilter.value == CoffeeClass.defect,
-                onTap: () => controller.filterByClass(CoffeeClass.defect),
-                color: AppColors.defect,
-              ),
-            ],
-          )),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Obx(() => ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _buildFilterChip(
+                  label: L.t('history_filter_all'),
+                  isSelected: controller.selectedFilter.value == null,
+                  onTap: () => controller.filterByClass(null),
+                ),
+                const SizedBox(width: 8),
+                _buildFilterChip(
+                  label: L.t('class_premium'),
+                  isSelected: controller.selectedFilter.value ==
+                      CoffeeClass.premium,
+                  onTap: () =>
+                      controller.filterByClass(CoffeeClass.premium),
+                  color: AppColors.premium,
+                ),
+                const SizedBox(width: 8),
+                _buildFilterChip(
+                  label: L.t('class_longberry'),
+                  isSelected: controller.selectedFilter.value ==
+                      CoffeeClass.longberry,
+                  onTap: () =>
+                      controller.filterByClass(CoffeeClass.longberry),
+                  color: AppColors.longberry,
+                ),
+                const SizedBox(width: 8),
+                _buildFilterChip(
+                  label: L.t('class_peaberry'),
+                  isSelected: controller.selectedFilter.value ==
+                      CoffeeClass.peaberry,
+                  onTap: () =>
+                      controller.filterByClass(CoffeeClass.peaberry),
+                  color: AppColors.peaberry,
+                ),
+                const SizedBox(width: 8),
+                _buildFilterChip(
+                  label: L.t('class_defect'),
+                  isSelected: controller.selectedFilter.value ==
+                      CoffeeClass.defect,
+                  onTap: () =>
+                      controller.filterByClass(CoffeeClass.defect),
+                  color: AppColors.defect,
+                ),
+              ],
+            )),
+      ),
     );
   }
 
@@ -155,30 +164,30 @@ class HistoryView extends GetView<HistoryController> {
       selectedColor: color ?? AppColors.coffeeBrown,
       checkmarkColor: isSelected ? AppColors.white : null,
       labelStyle: TextStyle(
-        color: isSelected ? AppColors.white : (color ?? AppColors.coffeeBrown),
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+        color: isSelected
+            ? AppColors.white
+            : (color ?? AppColors.coffeeBrown),
+        fontWeight:
+            isSelected ? FontWeight.w600 : FontWeight.w500,
       ),
     );
   }
 
-  /// List view
   Widget _buildListView(BuildContext context) {
     return Obx(() => ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: controller.filteredScans.length,
-          itemBuilder: (context, index) {
-            final scan = controller.filteredScans[index];
-            return _buildListCard(context, scan);
-          },
+          itemBuilder: (_, index) =>
+              _buildListCard(context, controller.filteredScans[index]),
         ));
   }
 
   Widget _buildListCard(BuildContext context, GradeResult scan) {
     final theme = Theme.of(context);
-    final topPrediction = scan.predictions.first;
-    final confidence = (topPrediction.probability * 100).toStringAsFixed(1);
-    final classColor = AppColors.getClassColor(topPrediction.label.name);
-    final confidenceColor = AppColors.getConfidenceColor(topPrediction.probability);
+    final top = scan.predictions.first;
+    final confidence = (top.probability * 100).toStringAsFixed(1);
+    final classColor = AppColors.getClassColor(top.label.name);
+    final confColor = AppColors.getConfidenceColor(top.probability);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -189,7 +198,6 @@ class HistoryView extends GetView<HistoryController> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Class icon
               Container(
                 width: 56,
                 height: 56,
@@ -197,81 +205,59 @@ class HistoryView extends GetView<HistoryController> {
                   color: classColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  topPrediction.label.icon,
-                  color: classColor,
-                  size: 28,
-                ),
+                child: Icon(top.label.icon, color: classColor, size: 28),
               ),
               const SizedBox(width: 16),
-              // Details
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      topPrediction.label.display,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    Text(L.className(top.label.name),
+                        style: theme.textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
                     Text(
-                      DateFormat('MMM d, yyyy • HH:mm').format(scan.createdAt),
-                      style: theme.textTheme.bodySmall,
-                    ),
+                        DateFormat('MMM d, yyyy • HH:mm')
+                            .format(scan.createdAt),
+                        style: theme.textTheme.bodySmall),
                     if (scan.isOod) ...[
                       const SizedBox(height: 4),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: AppColors.ood.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Text(
-                          'OOD',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: AppColors.ood,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: Text(L.t('not_a_bean'),
+                            style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.ood,
+                                fontWeight: FontWeight.w600)),
                       ),
                     ],
                   ],
                 ),
               ),
-              // Confidence badge
               Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
+                        horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: confidenceColor.withOpacity(0.15),
+                      color: confColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      '$confidence%',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: confidenceColor,
-                      ),
-                    ),
+                    child: Text('$confidence%',
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: confColor)),
                   ),
                   if (!scan.isSynced) ...[
                     const SizedBox(height: 8),
-                    const Icon(
-                      Icons.cloud_off,
-                      size: 16,
-                      color: AppColors.gray,
-                    ),
+                    const Icon(Icons.cloud_off,
+                        size: 16, color: AppColors.gray),
                   ],
                 ],
               ),
@@ -282,7 +268,6 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  /// Grid view
   Widget _buildGridView(BuildContext context) {
     return Obx(() => GridView.builder(
           padding: const EdgeInsets.all(16),
@@ -293,19 +278,17 @@ class HistoryView extends GetView<HistoryController> {
             childAspectRatio: 0.85,
           ),
           itemCount: controller.filteredScans.length,
-          itemBuilder: (context, index) {
-            final scan = controller.filteredScans[index];
-            return _buildGridCard(context, scan);
-          },
+          itemBuilder: (_, index) =>
+              _buildGridCard(context, controller.filteredScans[index]),
         ));
   }
 
   Widget _buildGridCard(BuildContext context, GradeResult scan) {
     final theme = Theme.of(context);
-    final topPrediction = scan.predictions.first;
-    final confidence = (topPrediction.probability * 100).toStringAsFixed(1);
-    final classColor = AppColors.getClassColor(topPrediction.label.name);
-    final confidenceColor = AppColors.getConfidenceColor(topPrediction.probability);
+    final top = scan.predictions.first;
+    final confidence = (top.probability * 100).toStringAsFixed(1);
+    final classColor = AppColors.getClassColor(top.label.name);
+    final confColor = AppColors.getConfidenceColor(top.probability);
 
     return Card(
       child: InkWell(
@@ -316,10 +299,8 @@ class HistoryView extends GetView<HistoryController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Top section
               Column(
                 children: [
-                  // Class icon
                   Container(
                     width: 64,
                     height: 64,
@@ -327,79 +308,55 @@ class HistoryView extends GetView<HistoryController> {
                       color: classColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Icon(
-                      topPrediction.label.icon,
-                      color: classColor,
-                      size: 32,
-                    ),
+                    child: Icon(top.label.icon,
+                        color: classColor, size: 32),
                   ),
                   const SizedBox(height: 12),
-                  // Class name
-                  Text(
-                    topPrediction.label.display,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  Text(L.className(top.label.name),
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center),
                   const SizedBox(height: 4),
-                  // Confidence
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
+                        horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: confidenceColor.withOpacity(0.15),
+                      color: confColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      '$confidence%',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: confidenceColor,
-                      ),
-                    ),
+                    child: Text('$confidence%',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: confColor)),
                   ),
                 ],
               ),
-              // Bottom section
               Column(
                 children: [
                   if (scan.isOod) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
+                          horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: AppColors.ood.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
-                        'OOD',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: AppColors.ood,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: const Text('OOD',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.ood,
+                              fontWeight: FontWeight.w600)),
                     ),
                     const SizedBox(height: 4),
                   ],
-                  Text(
-                    DateFormat('MMM d, HH:mm').format(scan.createdAt),
-                    style: theme.textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
+                  Text(DateFormat('MMM d, HH:mm').format(scan.createdAt),
+                      style: theme.textTheme.bodySmall,
+                      textAlign: TextAlign.center),
                   if (!scan.isSynced) ...[
                     const SizedBox(height: 4),
-                    const Icon(
-                      Icons.cloud_off,
-                      size: 14,
-                      color: AppColors.gray,
-                    ),
+                    const Icon(Icons.cloud_off,
+                        size: 14, color: AppColors.gray),
                   ],
                 ],
               ),
@@ -410,11 +367,10 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  /// Empty state
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
-    final hasFilters = controller.selectedFilter.value != null || 
-                       controller.searchQuery.value.isNotEmpty;
+    final hasFilters = controller.selectedFilter.value != null ||
+        controller.searchQuery.value.isNotEmpty;
 
     return Center(
       child: Padding(
@@ -429,26 +385,24 @@ class HistoryView extends GetView<HistoryController> {
             ),
             const SizedBox(height: 16),
             Text(
-              hasFilters ? 'No results found' : 'No history yet',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: AppColors.darkGray,
-              ),
+              hasFilters ? L.t('no_history') : L.t('no_history'),
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(color: AppColors.darkGray),
             ),
             const SizedBox(height: 8),
             Text(
               hasFilters
-                  ? 'Try adjusting your search or filters'
-                  : 'Your scan history will appear here',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.gray,
-              ),
+                  ? L.t('history_search_hint')
+                  : L.t('no_history'),
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: AppColors.gray),
               textAlign: TextAlign.center,
             ),
             if (hasFilters) ...[
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: controller.clearFilters,
-                child: const Text('Clear Filters'),
+                child: Text(L.t('cancel')),
               ),
             ],
           ],
@@ -457,32 +411,25 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  /// Show clear history confirmation dialog
   Future<void> _showClearDialog(BuildContext context) async {
     final result = await Get.dialog<bool>(
       AlertDialog(
-        title: const Text('Clear History'),
-        content: const Text(
-          'Are you sure you want to clear all scan history? This action cannot be undone.',
-        ),
+        title: Text(L.t('clear_history_q')),
+        content: Text(L.t('cannot_undo')),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
+            child: Text(L.t('cancel')),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.error,
-            ),
-            child: const Text('Clear'),
+                foregroundColor: AppColors.error),
+            child: Text(L.t('clear')),
           ),
         ],
       ),
     );
-
-    if (result == true) {
-      await controller.clearHistory();
-    }
+    if (result == true) await controller.clearHistory();
   }
 }
