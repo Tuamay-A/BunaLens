@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'dart:math' as math;
 
 import '../../core/constants/app_colors.dart';
+import '../../core/l10n/l10n.dart.dart';
+import '../../core/l10n/locale_controller.dart';
 import 'dashboard_controller.dart';
 
 class DashboardView extends GetView<DashboardController> {
@@ -11,89 +13,80 @@ class DashboardView extends GetView<DashboardController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
-      body: RefreshIndicator(
-        onRefresh: controller.refresh,
-        // Single top-level Obx — all reactive reads happen here.
-        // No nested Obx widgets anywhere below this point.
-        child: Obx(() {
-          final isLoading   = controller.isLoading.value;
-          final total       = controller.totalScans.value;
-          final premium     = controller.premiumCount.value;
-          final longberry   = controller.longberryCount.value;
-          final peaberry    = controller.peaberryCount.value;
-          final defect      = controller.defectCount.value;
-          final ood         = controller.oodCount.value;
-          final avgConf     = controller.avgConfidence.value;
-          final lastDate    = controller.lastScanDate.value;
-          final topClass    = controller.topClass;
-          final qualityPct  = controller.qualityPercentage;
-          final defectPct   = controller.defectPercentage;
+    final localeCtrl = Get.find<LocaleController>();
 
-          if (isLoading && total == 0) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return Obx(() {
+      localeCtrl.locale.value; // reactive locale observer
 
-          if (total == 0) {
-            return _buildEmptyState(context);
-          }
+      final isLoading  = controller.isLoading.value;
+      final total      = controller.totalScans.value;
+      final premium    = controller.premiumCount.value;
+      final longberry  = controller.longberryCount.value;
+      final peaberry   = controller.peaberryCount.value;
+      final defect     = controller.defectCount.value;
+      final ood        = controller.oodCount.value;
+      final avgConf    = controller.avgConfidence.value;
+      final lastDate   = controller.lastScanDate.value;
+      final topClass   = controller.topClass;
+      final qualityPct = controller.qualityPercentage;
+      final defectPct  = controller.defectPercentage;
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _buildOverviewCards(context, total, avgConf),
-              const SizedBox(height: 24),
-              _buildClassDistributionSection(
-                context, total, premium, longberry, peaberry, defect),
-              const SizedBox(height: 24),
-              _buildQualityMetricsSection(context, qualityPct, defectPct),
-              const SizedBox(height: 24),
-              _buildInsightsSection(
-                context, topClass, ood, lastDate),
-            ],
-          );
-        }),
-      ),
-    );
+      return Scaffold(
+        appBar: AppBar(title: Text(L.t('dashboard_title'))),
+        body: RefreshIndicator(
+          onRefresh: controller.refresh,
+          child: () {
+            if (isLoading && total == 0) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (total == 0) return _buildEmptyState(context);
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildOverviewCards(context, total, avgConf),
+                const SizedBox(height: 24),
+                _buildClassDistributionSection(
+                    context, total, premium, longberry, peaberry, defect),
+                const SizedBox(height: 24),
+                _buildQualityMetricsSection(context, qualityPct, defectPct),
+                const SizedBox(height: 24),
+                _buildInsightsSection(context, topClass, ood, lastDate),
+              ],
+            );
+          }(),
+        ),
+      );
+    });
   }
-
-  //  Overview cards 
 
   Widget _buildOverviewCards(
       BuildContext context, int total, double avgConf) {
     return Row(
       children: [
         Expanded(
-          child: _buildOverviewCard(
-            context,
-            icon: Icons.coffee,
-            label: 'Total Scans',
-            value: total.toString(),
-            color: AppColors.coffeeBrown,
-          ),
+          child: _buildOverviewCard(context,
+              icon: Icons.coffee,
+              label: L.t('dashboard_stats_total'),
+              value: total.toString(),
+              color: AppColors.coffeeBrown),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildOverviewCard(
-            context,
-            icon: Icons.speed,
-            label: 'Avg Confidence',
-            value: '${(avgConf * 100).toStringAsFixed(1)}%',
-            color: AppColors.info,
-          ),
+          child: _buildOverviewCard(context,
+              icon: Icons.speed,
+              label: L.t('confidence'),
+              value: '${(avgConf * 100).toStringAsFixed(1)}%',
+              color: AppColors.info),
         ),
       ],
     );
   }
 
-  Widget _buildOverviewCard(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
+  Widget _buildOverviewCard(BuildContext context,
+      {required IconData icon,
+      required String label,
+      required String value,
+      required Color color}) {
     final theme = Theme.of(context);
     return Card(
       child: Padding(
@@ -102,13 +95,9 @@ class DashboardView extends GetView<DashboardController> {
           children: [
             Icon(icon, color: color, size: 32),
             const SizedBox(height: 12),
-            Text(
-              value,
-              style: theme.textTheme.headlineMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            Text(value,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                    color: color, fontWeight: FontWeight.w700)),
             const SizedBox(height: 4),
             Text(label,
                 style: theme.textTheme.bodySmall,
@@ -119,21 +108,13 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  //  Class distribution 
-
-  Widget _buildClassDistributionSection(
-    BuildContext context,
-    int total,
-    int premium,
-    int longberry,
-    int peaberry,
-    int defect,
-  ) {
+  Widget _buildClassDistributionSection(BuildContext context, int total,
+      int premium, int longberry, int peaberry, int defect) {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Class Distribution',
+        Text(L.t('class_probabilities'),
             style: theme.textTheme.titleLarge
                 ?.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 16),
@@ -145,7 +126,7 @@ class DashboardView extends GetView<DashboardController> {
                 SizedBox(
                   height: 200,
                   child: total == 0
-                      ? const Center(child: Text('No data'))
+                      ? Center(child: Text(L.t('no_scans_yet')))
                       : CustomPaint(
                           size: const Size(200, 200),
                           painter: _PieChartPainter(
@@ -158,13 +139,17 @@ class DashboardView extends GetView<DashboardController> {
                         ),
                 ),
                 const SizedBox(height: 24),
-                _buildLegendItem('Premium',  premium,  total, AppColors.premium),
+                _buildLegendItem(
+                    L.t('class_premium'), premium, total, AppColors.premium),
                 const SizedBox(height: 8),
-                _buildLegendItem('Longberry', longberry, total, AppColors.longberry),
+                _buildLegendItem(L.t('class_longberry'), longberry, total,
+                    AppColors.longberry),
                 const SizedBox(height: 8),
-                _buildLegendItem('Peaberry', peaberry, total, AppColors.peaberry),
+                _buildLegendItem(
+                    L.t('class_peaberry'), peaberry, total, AppColors.peaberry),
                 const SizedBox(height: 8),
-                _buildLegendItem('Defect',   defect,   total, AppColors.defect),
+                _buildLegendItem(
+                    L.t('class_defect'), defect, total, AppColors.defect),
               ],
             ),
           ),
@@ -175,10 +160,8 @@ class DashboardView extends GetView<DashboardController> {
 
   Widget _buildLegendItem(
       String label, int count, int total, Color color) {
-    // All values passed as plain ints — no .value reads here.
-    final pct = total > 0
-        ? (count / total * 100).toStringAsFixed(1)
-        : '0.0';
+    final pct =
+        total > 0 ? (count / total * 100).toStringAsFixed(1) : '0.0';
     return Row(
       children: [
         Container(
@@ -189,22 +172,17 @@ class DashboardView extends GetView<DashboardController> {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(label,
-              style: const TextStyle(
-                  fontSize: 14, fontWeight: FontWeight.w500)),
-        ),
-        Text(
-          '$count ($pct%)',
-          style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.darkGray),
-        ),
+            child: Text(label,
+                style: const TextStyle(
+                    fontSize: 14, fontWeight: FontWeight.w500))),
+        Text('$count ($pct%)',
+            style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.darkGray)),
       ],
     );
   }
-
-  //  Quality metrics 
 
   Widget _buildQualityMetricsSection(
       BuildContext context, double qualityPct, double defectPct) {
@@ -212,32 +190,29 @@ class DashboardView extends GetView<DashboardController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Quality Metrics',
+        Text(L.t('on_device'),
             style: theme.textTheme.titleLarge
                 ?.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
-              child: _buildMetricCard(
-                context,
-                label: 'Quality Beans',
-                value: '${qualityPct.toStringAsFixed(1)}%',
-                icon: Icons.verified,
-                color: AppColors.success,
-                subtitle: 'Premium + Longberry + Peaberry',
-              ),
+              child: _buildMetricCard(context,
+                  label: L.t('dashboard_stats_premium'),
+                  value: '${qualityPct.toStringAsFixed(1)}%',
+                  icon: Icons.verified,
+                  color: AppColors.success,
+                  subtitle:
+                      '${L.t("class_premium")} + ${L.t("class_longberry")} + ${L.t("class_peaberry")}'),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildMetricCard(
-                context,
-                label: 'Defects',
-                value: '${defectPct.toStringAsFixed(1)}%',
-                icon: Icons.warning_amber_rounded,
-                color: AppColors.warning,
-                subtitle: 'Defective beans detected',
-              ),
+              child: _buildMetricCard(context,
+                  label: L.t('class_defect'),
+                  value: '${defectPct.toStringAsFixed(1)}%',
+                  icon: Icons.warning_amber_rounded,
+                  color: AppColors.warning,
+                  subtitle: L.t('desc_defect')),
             ),
           ],
         ),
@@ -245,14 +220,12 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  Widget _buildMetricCard(
-    BuildContext context, {
-    required String label,
-    required String value,
-    required IconData icon,
-    required Color color,
-    required String subtitle,
-  }) {
+  Widget _buildMetricCard(BuildContext context,
+      {required String label,
+      required String value,
+      required IconData icon,
+      required Color color,
+      required String subtitle}) {
     final theme = Theme.of(context);
     return Card(
       child: Padding(
@@ -277,36 +250,34 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  //   Insights ────────────────────────────────────────────────────────────────
-
   Widget _buildInsightsSection(BuildContext context, String topClass,
       int oodCount, DateTime? lastDate) {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Insights',
+        Text(L.t('model_arch'),
             style: theme.textTheme.titleLarge
                 ?.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 16),
         _buildInsightCard(context,
             icon: Icons.trending_up,
-            title: 'Top Class',
+            title: L.t('class_premium'),
             value: topClass,
             color: AppColors.premium),
         if (oodCount > 0) ...[
           const SizedBox(height: 12),
           _buildInsightCard(context,
               icon: Icons.help_outline,
-              title: 'Out of Distribution',
-              value: '$oodCount scans',
+              title: L.t('not_a_bean'),
+              value: '$oodCount ${L.t("history_filter_all")}',
               color: AppColors.ood),
         ],
         if (lastDate != null) ...[
           const SizedBox(height: 12),
           _buildInsightCard(context,
               icon: Icons.schedule,
-              title: 'Last Scan',
+              title: L.t('scan_detail_timestamp'),
               value: _formatLastScanDate(lastDate),
               color: AppColors.info),
         ],
@@ -314,13 +285,11 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  Widget _buildInsightCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-  }) {
+  Widget _buildInsightCard(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required String value,
+      required Color color}) {
     final theme = Theme.of(context);
     return Card(
       child: Padding(
@@ -353,8 +322,6 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  //  Empty state 
-
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
     return Center(
@@ -366,34 +333,32 @@ class DashboardView extends GetView<DashboardController> {
             Icon(Icons.dashboard_outlined,
                 size: 64, color: AppColors.gray.withOpacity(0.5)),
             const SizedBox(height: 16),
-            Text('No data yet',
+            Text(L.t('no_scans_yet'),
                 style: theme.textTheme.titleMedium
                     ?.copyWith(color: AppColors.darkGray)),
             const SizedBox(height: 8),
-            Text(
-              'Scan some coffee beans to see your dashboard statistics',
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: AppColors.gray),
-              textAlign: TextAlign.center,
-            ),
+            Text(L.t('hero_body'),
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: AppColors.gray),
+                textAlign: TextAlign.center),
           ],
         ),
       ),
     );
   }
 
-  //   Helpers 
-
   String _formatLastScanDate(DateTime date) {
     final diff = DateTime.now().difference(date);
-    if (diff.inDays == 0) return 'Today at ${DateFormat('HH:mm').format(date)}';
-    if (diff.inDays == 1) return 'Yesterday at ${DateFormat('HH:mm').format(date)}';
+    if (diff.inDays == 0) {
+      return 'Today at ${DateFormat('HH:mm').format(date)}';
+    }
+    if (diff.inDays == 1) {
+      return 'Yesterday at ${DateFormat('HH:mm').format(date)}';
+    }
     if (diff.inDays < 7) return '${diff.inDays} days ago';
     return DateFormat('MMM d, yyyy').format(date);
   }
 }
-
-//  Pie chart painter 
 
 class _PieChartPainter extends CustomPainter {
   final int premiumCount;
@@ -402,13 +367,12 @@ class _PieChartPainter extends CustomPainter {
   final int defectCount;
   final int total;
 
-  _PieChartPainter({
-    required this.premiumCount,
-    required this.longberryCount,
-    required this.peaberryCount,
-    required this.defectCount,
-    required this.total,
-  });
+  _PieChartPainter(
+      {required this.premiumCount,
+      required this.longberryCount,
+      required this.peaberryCount,
+      required this.defectCount,
+      required this.total});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -432,26 +396,24 @@ class _PieChartPainter extends CustomPainter {
       startAngle += sweep;
     }
 
-    drawSlice(premiumCount,  AppColors.premium);
+    drawSlice(premiumCount, AppColors.premium);
     drawSlice(longberryCount, AppColors.longberry);
     drawSlice(peaberryCount, AppColors.peaberry);
-    drawSlice(defectCount,   AppColors.defect);
+    drawSlice(defectCount, AppColors.defect);
 
-    // Donut hole
     canvas.drawCircle(
-      center,
-      radius * 0.5,
-      Paint()
-        ..color = AppColors.white
-        ..style = PaintingStyle.fill,
-    );
+        center,
+        radius * 0.5,
+        Paint()
+          ..color = AppColors.white
+          ..style = PaintingStyle.fill);
   }
 
   @override
   bool shouldRepaint(_PieChartPainter old) =>
-      premiumCount  != old.premiumCount  ||
+      premiumCount != old.premiumCount ||
       longberryCount != old.longberryCount ||
       peaberryCount != old.peaberryCount ||
-      defectCount   != old.defectCount   ||
-      total         != old.total;
+      defectCount != old.defectCount ||
+      total != old.total;
 }
