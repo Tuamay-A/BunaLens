@@ -9,12 +9,15 @@
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
+
 ## 🏢 Project Context & Organization
--**Project Name:** BunaLens
--**Developer:** Tuamay Assefa(CTC-2058-26)
--**Organization:** INSA(Information Network Security Administration)
--**Project Type:** 5th Batch INSA Summer Camp Graduation Project
--**Role:** AI & Mobile Developer
+
+- **Project Name:** BunaLens
+- **Developer:** Tuamay Assefa (CTC-2058-26)
+- **Organization:** INSA (Information Network Security Administration)
+- **Project Type:** 5th Batch INSA Summer Camp Graduation Project
+- **Role:** AI & Mobile Developer
+
 ---
 
 ## 📱 Screenshots
