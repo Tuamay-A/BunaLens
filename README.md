@@ -1,6 +1,6 @@
 # ☕ BunaLens
 
-> AI-powered Ethiopian coffee bean quality grading — offline-first, cloud-synced, built with Flutter.
+> BunaLens is an offline, on-device mobile application that uses deep learning to grade Ethiopian green coffee beans. Developed as an 5th Batch INSA Summer Camp graduation project, BunaLens provides a fast, objective, and accessible quality-screening tool for agricultural professionals and smallholder farmers.
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)
@@ -8,6 +8,13 @@
 ![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20Web-lightgrey)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
+---
+## 🏢 Project Context & Organization
+-**Project Name:** BunaLens
+-**Developer:** Tuamay Assefa(CTC-2058-26)
+-**Organization:** INSA(Information Network Security Administration)
+-**Project Type:** 5th Batch INSA Summer Camp Graduation Project
+-**Role:** AI & Mobile Developer
 ---
 
 ## 📱 Screenshots
