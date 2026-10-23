@@ -21,12 +21,12 @@
 ---
 
 ## 📱 Screenshots
-
+- **English Language** 
 <div align="center">
 
 | Sign In | Sign Up | Home |
 |:---:|:---:|:---:|
-| <img src="assets/screenshots/signIn_page.jpg" width="180"/> | <img src="assets/screenshots/signUp.jpg" width="180"/> | <img src="assets/screenshots/home_page.jpg" width="180"/> |
+| <img src="assets/screenshots/signIn_page.jpg" width="180"/> | <img src="assets/screenshots/sign_up.jpg" width="180"/> | <img src="assets/screenshots/home_page.jpg" width="180"/> |
 
 | Dashboard | Scan Details | Profile |
 |:---:|:---:|:---:|
@@ -34,6 +34,18 @@
 
 </div>
 
+- **Amharic Language** 
+<div align="center">
+
+| Sign In | Sign Up | Home |
+|:---:|:---:|:---:|
+| <img src="assets/screenshots/sign_in_Amharic.jpg" width="180"/> | <img src="assets/screenshots/sign_up_page_Amharic.jpg" width="180"/> | <img src="assets/screenshots/home_Amharic.jpg" width="180"/> |
+
+| Dashboard | Scan Details | Profile |
+|:---:|:---:|:---:|
+| <img src="assets/screenshots/details_amharic.jpg" width="180"/> | <img src="assets/screenshots/history_Amharic.jpg" width="180"/> | <img src="assets/screenshots/profile_Amharic.jpg" width="180"/> |
+
+</div>
 ---
 
 ## 🌟 Features
